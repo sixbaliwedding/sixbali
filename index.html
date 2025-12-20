@@ -16,13 +16,14 @@ html{scroll-behavior:smooth}
 body{font-family:Roboto,sans-serif;background:#f9f9f9;color:#333}
 h1,h2,h3{font-family:'Playfair Display',serif}
 
-/* HEADER - LOGO CENTERED */
+/* HEADER - DESKTOP */
 header{background:#003366;color:#fff;padding:15px 0;position:sticky;top:0;z-index:99}
 header .container{
     max-width:1200px;margin:auto;padding:0 20px;
     display:flex;justify-content:space-between;align-items:center;
 }
-.logo-center img{height:70px;width:auto;display:block}
+.logo-center img{height:70px;width:auto;display:block;transition: 0.3s;}
+nav{display: flex; align-items: center;}
 nav a{color:#fff;font-weight:500;text-decoration:none;margin:0 15px;text-transform:uppercase;font-size:0.85em;letter-spacing:1px}
 
 /* HERO */
@@ -80,15 +81,33 @@ section{padding:90px 0}
 .maps-frame{border-radius:22px;overflow:hidden;box-shadow:0 18px 35px rgba(0,0,0,.18)}
 .maps-frame iframe{width:100%;height:360px;border:0}
 
-/* RESPONSIVE */
+/* RESPONSIVE - KHUSUS HP */
 @media(max-width:900px){
-  header .container{flex-direction:column; gap:15px}
+  header .container{
+    flex-direction: column; 
+    gap: 12px;
+    padding: 10px 0;
+  }
+  header nav {
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  header nav a {
+    margin: 5px 10px;
+    font-size: 0.75em;
+  }
+  .logo-center img{
+    height: 55px; /* Logo lebih kecil di HP */
+  }
   .about-wrap, .maps-wrap{grid-template-columns:1fr;text-align:center}
-  .hero h2{font-size:2.5em}
+  .hero h2{font-size:2.2em}
+  .hero p{font-size:1.1em}
+  .section-title{font-size:2em}
 }
 
 /* WHATSAPP */
-.whatsapp-bubble{position:fixed;right:26px;bottom:26px;background:#25D366;padding:15px;border-radius:50px;z-index:999}
+.whatsapp-bubble{position:fixed;right:26px;bottom:26px;background:#25D366;padding:15px;border-radius:50%;z-index:999;box-shadow: 0 4px 15px rgba(0,0,0,0.2)}
 footer{background:#003366;color:#fff;text-align:center;padding:30px}
 </style>
 </head>
@@ -101,9 +120,11 @@ footer{background:#003366;color:#fff;text-align:center;padding:30px}
       <a href="#about">About</a>
       <a href="#gallery">Gallery</a>
     </nav>
+    
     <div class="logo-center">
-      <a href="#"><img src="logo.png" alt="Six Bali Logo"></a>
+      <a href="#"><img src="portosix/logo.png" alt="Six Bali Logo"></a>
     </div>
+
     <nav>
       <a href="#video">Video</a>
       <a href="#maps">Maps</a>
@@ -165,10 +186,12 @@ footer{background:#003366;color:#fff;text-align:center;padding:30px}
       <div class="maps-info">
         <h2>Visit & Contact</h2>
         <p>Based in Bali, Indonesia. Available for photography across the island.</p>
-        <a href="https://wa.me/6281338869774" target="_blank" class="maps-btn wa">💬 Contact via WhatsApp</a>
+        <div class="maps-actions">
+           <a href="https://wa.me/6281338869774" target="_blank" class="maps-btn wa">💬 WhatsApp</a>
+        </div>
       </div>
       <div class="maps-frame">
-        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d126214.33649206716!2d115.116744!3d-8.670458!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2dd2409b0e5e1e77%3A0x4030bf45931b260!2sBali!5e0!3m2!1sen!2sid!4v1700000000000!5m2!1sen!2sid" loading="lazy"></iframe>
+        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d126214.363991307!2d115.154130612198!3d-8.6726833075276!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2dd23f005f560001%3A0xc4e92a29df340e66!2sBali!5e0!3m2!1sen!2sid!4v1700000000000!5m2!1sen!2sid" loading="lazy"></iframe>
       </div>
     </div>
   </div>
@@ -177,7 +200,7 @@ footer{background:#003366;color:#fff;text-align:center;padding:30px}
 <footer>© Six Bali Photography</footer>
 
 <a id="whatsappBubble" class="whatsapp-bubble" target="_blank">
-  <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" width="30">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" width="30" alt="WhatsApp">
 </a>
 
 <script>
@@ -193,15 +216,19 @@ function loadGallery(cat, btn){
   const grid = document.getElementById("galleryGrid");
   if(cat === 'video'){
     grid.innerHTML = galleryData.video.map(id => `
-      <div class="gallery-item"><div style="position:relative;padding-bottom:56.25%;height:0">
-      <iframe style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" src="https://www.youtube.com/embed/${id}"></iframe>
-      </div></div>`).join("");
+      <div class="gallery-item" style="background:#000;">
+        <div style="position:relative;padding-bottom:56.25%;height:0">
+          <iframe style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" src="https://www.youtube.com/embed/${id}?rel=0" allowfullscreen></iframe>
+        </div>
+      </div>`).join("");
   } else {
     grid.innerHTML = galleryData[cat].map(s => `<div class="gallery-item"><img src="${s}" loading="lazy"></div>`).join("");
   }
   document.querySelectorAll(".gallery-filter button").forEach(b=>b.classList.remove("active"));
   btn.classList.add("active");
 }
+
+// Jalankan wedding saat pertama kali buka
 document.addEventListener("DOMContentLoaded",()=>loadGallery("wedding",document.querySelector(".gallery-filter button")));
 
 const phone="6281338869774";
