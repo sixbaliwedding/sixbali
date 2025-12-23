@@ -44,9 +44,24 @@ section{padding:80px 0}
 .gallery-filter button{border:2px solid #003366;background:none;color:#003366;padding:8px 20px;border-radius:25px;margin:5px;cursor:pointer}
 .gallery-filter button.active,.gallery-filter button:hover{background:#003366;color:#fff}
 .gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:15px}
-.gallery-item{border-radius:10px;overflow:hidden;background:#ddd;cursor:pointer}
+.gallery-item{border-radius:10px;overflow:hidden;background:#ddd;cursor:pointer;position:relative}
 .gallery-item img{width:100%;transition:.4s;display:block}
 .gallery-item:hover img{transform:scale(1.05)}
+
+/* VIDEO WRAPPER INSIDE GALLERY GRID */
+.gallery-video-container {
+    position: relative;
+    padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+    height: 0;
+    overflow: hidden;
+    border-radius: 10px;
+}
+.gallery-video-container iframe {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    border: 0;
+}
 
 /* LIGHTBOX MODAL */
 .lightbox{display:none;position:fixed;z-index:10000;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);justify-content:center;align-items:center;touch-action:none}
@@ -56,7 +71,7 @@ section{padding:80px 0}
 .lightbox-prev{left:10px}
 .lightbox-next{right:10px}
 
-/* VIDEO */
+/* VIDEO SECTION LOWER */
 .video-section{background:#f0f4f8}
 .video-wrapper{position:relative;padding-bottom:56.25%;height:0}
 .video-wrapper iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:0}
@@ -76,7 +91,7 @@ footer{background:#003366;color:#fff;text-align:center;padding:40px 20px}
 header .container{flex-direction:column;gap:15px}
 .about-wrap,.maps-wrap{grid-template-columns:1fr;text-align:center}
 .hero h2{font-size:2.2em}
-.lightbox-nav{display:none} /* Sembunyikan panah di mobile agar fokus ke swipe */
+.lightbox-nav{display:none}
 }
 </style>
 </head>
@@ -136,10 +151,10 @@ header .container{flex-direction:column;gap:15px}
 </section>
 
 <div id="lightbox" class="lightbox">
-    <span class="lightbox-close" onclick="closeLightbox()">&times;</span>
-    <button class="lightbox-nav lightbox-prev" onclick="changeImage(-1); event.stopPropagation();">&#10094;</button>
+    <span class="lightbox-close" onclick="closeLightbox()">×</span>
+    <button class="lightbox-nav lightbox-prev" onclick="changeImage(-1); event.stopPropagation();">❮</button>
     <img id="lightbox-img" src="">
-    <button class="lightbox-nav lightbox-next" onclick="changeImage(1); event.stopPropagation();">&#10095;</button>
+    <button class="lightbox-nav lightbox-next" onclick="changeImage(1); event.stopPropagation();">❯</button>
 </div>
 
 <section id="video" class="video-section">
@@ -181,33 +196,50 @@ header .container{flex-direction:column;gap:15px}
 </a>
 
 <script>
+// DATA SOURCE
 const galleryData={
 wedding:[...Array(20)].map((_,i)=>`GALLERY/GALLERY_${String(i+1).padStart(2,'0')}.jpg`),
 prewedding:[...Array(14)].map((_,i)=>`prewed/PREWED_${String(i+1).padStart(2,'0')}.jpg`),
 event:[...Array(14)].map((_,i)=>`event/EVENT${String(i+1).padStart(2,'0')}.jpg`),
-birthday:[...Array(8)].map((_,i)=>`birthday/17TH${String(i+1).padStart(2,'0')}.jpg`)
+birthday:[...Array(8)].map((_,i)=>`birthday/17TH${String(i+1).padStart(2,'0')}.jpg`),
+// SILAKAN GANTI KODE DI BAWAH INI DENGAN ID YOUTUBE ANDA
+video:[
+    "QHIEA_1xqso", 
+    "eUyAaOkowXY", 
+    "Fk_K0Ku0RdU",
+"R87q9MpEqwM",
+"oYdwxBHkcfA", "mlhM5XS9Yxs",
+]
 };
 
-let currentImages = [];
+let currentItems = [];
 let currentIndex = 0;
 let touchStartX = 0;
 let touchEndX = 0;
+let currentCategory = 'wedding';
 
 function loadGallery(cat,btn){
     const grid=document.getElementById('galleryGrid');
     grid.innerHTML='';
-    currentImages = galleryData[cat]; // Simpan daftar gambar kategori aktif
+    currentItems = galleryData[cat];
+    currentCategory = cat;
     
-    currentImages.forEach((src, index)=>{
+    currentItems.forEach((item, index)=>{
         const d=document.createElement('div');
-        d.className='gallery-item';
-        d.onclick = () => openLightbox(index);
         
-        const i=document.createElement('img');
-        i.src=src;
-        i.loading="lazy";
-        
-        d.appendChild(i);
+        if(cat === 'video') {
+            // Jika kategori Video, buat Iframe
+            d.className='gallery-video-container';
+            d.innerHTML = `<iframe src="https://www.youtube.com/embed/${item}" allowfullscreen></iframe>`;
+        } else {
+            // Jika kategori gambar, buat thumbnail seperti biasa
+            d.className='gallery-item';
+            d.onclick = () => openLightbox(index);
+            const i=document.createElement('img');
+            i.src=item;
+            i.loading="lazy";
+            d.appendChild(i);
+        }
         grid.appendChild(d);
     });
     
@@ -215,52 +247,45 @@ function loadGallery(cat,btn){
     btn.classList.add('active');
 }
 
-// FUNGSI LIGHTBOX
+// FUNGSI LIGHTBOX (HANYA UNTUK GAMBAR)
 function openLightbox(index) {
+    if(currentCategory === 'video') return; // Matikan lightbox jika sedang di mode video
     currentIndex = index;
     const lightbox = document.getElementById('lightbox');
     const img = document.getElementById('lightbox-img');
-    img.src = currentImages[currentIndex];
+    img.src = currentItems[currentIndex];
     lightbox.style.display = 'flex';
-    document.body.style.overflow = 'hidden'; // Kunci scroll layar utama
+    document.body.style.overflow = 'hidden';
 }
 
 function closeLightbox() {
     document.getElementById('lightbox').style.display = 'none';
-    document.body.style.overflow = 'auto'; // Aktifkan scroll kembali
+    document.body.style.overflow = 'auto';
 }
 
 function changeImage(step) {
     currentIndex += step;
-    if (currentIndex >= currentImages.length) currentIndex = 0;
-    if (currentIndex < 0) currentIndex = currentImages.length - 1;
-    document.getElementById('lightbox-img').src = currentImages[currentIndex];
+    if (currentIndex >= currentItems.length) currentIndex = 0;
+    if (currentIndex < 0) currentIndex = currentItems.length - 1;
+    document.getElementById('lightbox-img').src = currentItems[currentIndex];
 }
 
-// DETEKSI SWIPE (SENTUHAN)
+// SWIPE LOGIC
 const lightboxEl = document.getElementById('lightbox');
-
-lightboxEl.addEventListener('touchstart', e => {
-    touchStartX = e.changedTouches[0].screenX;
-}, {passive: true});
-
-lightboxEl.addEventListener('touchend', e => {
+lightboxEl.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, {passive: true});
+lightboxEl.addEventListener('touchend', e => { 
     touchEndX = e.changedTouches[0].screenX;
-    handleSwipe();
+    if(currentCategory !== 'video') handleSwipe(); 
 }, {passive: true});
 
 function handleSwipe() {
     const threshold = 50;
-    if (touchEndX < touchStartX - threshold) changeImage(1);  // Swipe kiri -> Next
-    if (touchEndX > touchStartX + threshold) changeImage(-1); // Swipe kanan -> Prev
+    if (touchEndX < touchStartX - threshold) changeImage(1);
+    if (touchEndX > touchStartX + threshold) changeImage(-1);
 }
 
-// Tutup lightbox jika area luar gambar diklik
-lightboxEl.onclick = function(e) {
-    if (e.target === lightboxEl) closeLightbox();
-};
+lightboxEl.onclick = function(e) { if (e.target === lightboxEl) closeLightbox(); };
 
-// Navigasi Keyboard (Opsional)
 document.addEventListener('keydown', e => {
     if (document.getElementById('lightbox').style.display === 'flex') {
         if (e.key === "ArrowRight") changeImage(1);
